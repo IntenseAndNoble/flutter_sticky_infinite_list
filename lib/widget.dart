@@ -228,6 +228,12 @@ class InfiniteList extends StatefulWidget {
   /// Proxy property for [ScrollView.physics]
   final ScrollPhysics physics;
 
+  final List<Widget> sliversBefore;
+
+  final List<Widget> sliversAfter;
+
+  final Widget separator;
+
   final Key _centerKey;
 
   InfiniteList({
@@ -242,6 +248,9 @@ class InfiniteList extends StatefulWidget {
     this.cacheExtent,
     this.scrollDirection = Axis.vertical,
     this.physics,
+    this.sliversBefore = const [],
+    this.sliversAfter = const [],
+    this.separator,
   })  : _centerKey =
             (direction == InfiniteListDirection.multi) ? UniqueKey() : null,
         super(key: key);
@@ -265,30 +274,35 @@ class _InfiniteListState extends State<InfiniteList> {
   SliverList get _forwardList => SliverList(
         delegate: SliverChildBuilderDelegate(
           _buildListItem,
-          childCount: widget.posChildCount,
+          childCount: widget.posChildCount * 2 - 1,
         ),
         key: widget._centerKey,
       );
 
-  Widget _buildListItem(BuildContext context, int index) =>
-      _StickySliverListItem<int>(
-        streamController: _streamController,
-        index: index,
-        listItem: widget.builder(context, index),
-      );
+  Widget _buildListItem(BuildContext context, int index) => index.isEven
+      ? _StickySliverListItem<int>(
+          streamController: _streamController,
+          index: index,
+          listItem: widget.builder(context, index),
+        )
+      : widget.separator;
 
-  List<SliverList> get _slivers {
+  List<Widget> get _slivers {
     switch (widget.direction) {
       case InfiniteListDirection.multi:
         return [
+          ...widget.sliversBefore,
           _reverseList,
           _forwardList,
+          ...widget.sliversAfter,
         ];
 
       case InfiniteListDirection.single:
       default:
         return [
+          ...widget.sliversBefore,
           _forwardList,
+          ...widget.sliversAfter,
         ];
     }
   }
