@@ -274,7 +274,7 @@ class _InfiniteListState extends State<InfiniteList> {
   SliverList get _forwardList => SliverList(
         delegate: SliverChildBuilderDelegate(
           _buildListItem,
-          childCount: widget.posChildCount * 2 - 1,
+          childCount: widget.posChildCount == null ? 0 : widget.posChildCount * 2 - 1,
         ),
         key: widget._centerKey,
       );
